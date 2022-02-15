@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sub-indexer-bundle 
+  namespace: sub-back
+spec:
+  backoffLimit: 10
+  activeDeadlineSeconds: 240
+  template:
+    spec:
+      volumes:
+      - name: node
+        persistentVolumeClaim:
+          claimName: stage-indexer-pvc
+      containers:
+      - name: sub-indexer-bundle
+        image: alpine/git 
+        imagePullPolicy: IfNotPresent        
+        command: ['sh', '-c', 'git clone -b master https://github.com/oap75/subsocial-graphql.git /tmp/subsocial-graphql && rm -rf /usr/src/indexer/typesBundle.json && mv /tmp/subsocial-graphql/typesBundle.json /usr/src/indexer/typesBundle.json && chmod 777  /usr/src/indexer/typesBundle.json']
+        volumeMounts:
+         - name: node
+           mountPath: /usr/src/indexer
+      restartPolicy: OnFailure

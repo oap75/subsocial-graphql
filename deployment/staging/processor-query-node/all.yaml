@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sub-processor-query
+  namespace: sub-back
+  labels:
+    app: sub-processor-query
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: sub-processor-query
+      labels:
+        app: sub-processor-query
+    spec:
+      containers:
+        - name: sub-processor-query
+          image: <IMAGE> 
+          imagePullPolicy: IfNotPresent
+          command:
+            ['sh', '-c', 'yarn query-node:start']            
+          ports:
+            - containerPort: 4000
+          envFrom:
+            - configMapRef:
+                name: sub-processor-env
+
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: sub-processor-query
+

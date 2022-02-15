@@ -1,0 +1,31 @@
+name: update indexer
+on:
+  push:
+    branches:
+      - main
+      - master        
+    paths:
+      - 'deployment/staging/indexer-gw/all.yaml'
+jobs:
+  staging_deploy:
+    name: deploy to DO
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout main
+        uses: actions/checkout@v2
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+  
+      - name: Save DigitalOcean kubeconfig with short-lived credentials
+        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 c7e84602-9029-40ed-9f95-6c113f6693ee
+
+      - name: Deploy to DigitalOcean Kubernetes
+        run: kubectl apply -f $GITHUB_WORKSPACE/deployment/staging/indexer-gw/all.yaml
+ 
+      - name: Verify deployment
+        run: kubectl -n sub-back rollout status deployment/sub-indexer-gw

@@ -1,0 +1,13 @@
+FROM node:14-alpine AS builder
+
+WORKDIR /home/hydra-builder
+
+COPY . .
+
+RUN       yarn && \
+          yarn codegen && \
+          yarn typegen && \
+          yarn build && \
+          yarn --frozen-lockfile
+
+CMD [""]
